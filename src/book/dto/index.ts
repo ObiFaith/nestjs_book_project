@@ -11,10 +11,12 @@ export class CreateBookDto {
 
   @IsNumber()
   @IsOptional()
+  @IsNotEmpty()
   publication_year: number;
 
   @IsString()
   @IsOptional()
+  @IsNotEmpty()
   genre: string;
 }
 
