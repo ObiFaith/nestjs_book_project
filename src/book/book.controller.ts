@@ -16,18 +16,18 @@ export class BookController {
   constructor(private bookService: BookService) {}
 
   @Get()
-  getBooks(): Array<BookDto> {
+  getBooks(): Promise<Array<BookDto>> {
     return this.bookService.getBooks();
   }
 
   @Get(':id')
-  getBook(@Param('id') id: string): BookDto {
+  getBook(@Param('id') id: string): Promise<BookDto> {
     return this.bookService.getBook(id);
   }
 
-  @HttpCode(201)
   @Post()
-  createBook(@Body() createBookDto: CreateBookDto): BookDto {
+  @HttpCode(201)
+  createBook(@Body() createBookDto: CreateBookDto): Promise<BookDto> {
     return this.bookService.createBook(createBookDto);
   }
 
@@ -35,7 +35,7 @@ export class BookController {
   updateBook(
     @Param('id') id: string,
     @Body() updateBook: UpdateBookDto,
-  ): BookDto {
+  ): Promise<BookDto> {
     return this.bookService.updateBook(id, updateBook);
   }
 

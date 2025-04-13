@@ -1,42 +1,37 @@
-import { books } from './constant';
-import { Book, CreateBook, UpdateBook } from './type';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { Book } from 'src/entity/book.entity';
+import { CreateBook, UpdateBook } from './interface';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class BookService {
-  private books: Array<Book> = books;
+  constructor(
+    @Inject('BOOK_REPOSITORY')
+    private bookRepo: Repository<Book>,
+  ) {}
 
-  getBooks(): Array<Book> {
-    return this.books;
+  async getBooks(): Promise<Array<Book>> {
+    return await this.bookRepo.find();
   }
 
-  getBook(bookId: string): Book {
-    const book = this.books.find((book) => book.id === bookId);
+  async getBook(bookId: string): Promise<Book> {
+    const book = await this.bookRepo.findOneBy({ id: bookId });
     if (!book) throw new NotFoundException('Book not found!');
     return book;
   }
 
-  createBook(book: CreateBook): Book {
-    const bookIds = this.books.map((book) => Number(book.id));
-    const newBookId = Math.max(...bookIds) + 1;
-
-    const newBook = { id: String(newBookId), ...book };
-    this.books.push(newBook);
-
+  async createBook(book: CreateBook): Promise<Book> {
+    const newBook = this.bookRepo.create(book);
+    await this.bookRepo.save(newBook);
     return newBook;
   }
 
-  updateBook(bookId: string, updateBook: UpdateBook): Book {
-    const bookIndex = this.books.findIndex((book) => book.id === bookId);
-    if (bookIndex === -1) throw new NotFoundException('Book not found!');
-
-    this.books[bookIndex] = { ...this.books[bookIndex], ...updateBook };
-
-    return this.books[bookIndex];
+  async updateBook(bookId: string, updateBook: UpdateBook): Promise<Book> {
+    await this.bookRepo.update(bookId, updateBook);
+    return await this.getBook(bookId);
   }
 
-  deleteBook(bookId: string) {
-    const books = this.books.filter((book) => book.id !== bookId);
-    this.books = books;
+  async deleteBook(bookId: string) {
+    await this.bookRepo.delete(bookId);
   }
 }
